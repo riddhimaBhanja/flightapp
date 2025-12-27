@@ -20,6 +20,7 @@ pipeline {
         }
         stage('Deploy images') {
             steps {
+                bat "docker compose down || exit 0"
                 bat "docker compose up -d"
             }
         }
