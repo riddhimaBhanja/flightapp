@@ -28,6 +28,12 @@ pipeline {
                 """
                 echo 'Starting services with docker-compose...'
                 bat "docker compose up -d"
+
+                echo 'Waiting for services to become healthy...'
+                sleep(time: 90, unit: 'SECONDS')
+
+                echo 'Checking service status...'
+                bat "docker ps -a"
             }
         }
     }
