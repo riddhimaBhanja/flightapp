@@ -1,0 +1,39 @@
+# ============================================
+# AUTH SERVICE - DOCKER DEPLOYMENT PROFILE
+# ============================================
+# Activated automatically in docker-compose.yml
+# via: SPRING_PROFILES_ACTIVE=docker
+
+server:
+  port: 8084
+
+spring:
+  r2dbc:
+    url: r2dbc:mysql://${DB_HOST:mysql-auth}:${DB_PORT:3306}/${DB_NAME:flightapp_auth}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:root}
+  
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://eureka-server:8761/eureka/}
+  instance:
+    hostname: auth-service
+    prefer-ip-address: false
+
+jwt:
+  secret: ${JWT_SECRET:DOCKER_SECRET_KEY_FOR_JWT_TOKEN_MUST_BE_OVERRIDDEN_IN_ENV}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+password:
+  expiry:
+    demo-mode: ${PASSWORD_EXPIRY_DEMO_MODE:false}
+    demo-seconds: ${PASSWORD_EXPIRY_DEMO_SECONDS:5}
+    production-days: ${PASSWORD_EXPIRY_PRODUCTION_DAYS:90}
+
+logging:
+  level:
+    com.flightapp.auth: INFO
+    org.springframework.r2dbc: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

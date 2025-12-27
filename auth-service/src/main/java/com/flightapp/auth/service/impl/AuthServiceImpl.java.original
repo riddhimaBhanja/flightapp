@@ -1,0 +1,325 @@
+package com.flightapp.auth.service.impl;
+import com.flightapp.auth.dto.AuthRequest;
+import com.flightapp.auth.config.PasswordExpiryProperties;
+import com.flightapp.auth.dto.AuthResponse;
+import com.flightapp.auth.dto.ChangePasswordRequest;
+import com.flightapp.auth.dto.ChangePasswordResponse;
+import com.flightapp.auth.dto.PasswordExpiryStatusResponse;
+import com.flightapp.auth.dto.RegisterRequest;
+import com.flightapp.auth.dto.ValidateTokenResponse;
+import com.flightapp.auth.entity.PasswordHistory;
+import com.flightapp.auth.entity.User;
+import com.flightapp.auth.repository.PasswordHistoryRepository;
+import com.flightapp.auth.repository.UserRepository;
+import com.flightapp.auth.service.AuthService;
+import com.flightapp.auth.util.JwtUtil;
+import com.flightapp.auth.util.PasswordValidator;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class AuthServiceImpl implements AuthService {
+
+    private final UserRepository userRepository;
+    private final PasswordHistoryRepository passwordHistoryRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final PasswordExpiryProperties passwordExpiryProperties;
+    private final JwtUtil jwtUtil;
+
+    // Number of previous passwords to track and prevent reuse
+    private static final int PASSWORD_HISTORY_LIMIT = 5;
+
+    @Override
+    public Mono<AuthResponse> login(AuthRequest request) {
+        log.info("Login attempt for username: {}", request.getUsername());
+
+        return userRepository.findByUsername(request.getUsername())
+                .filter(user -> passwordEncoder.matches(request.getPassword(), user.getPassword()))
+                
+                .filter(User::getEnabled)
+                .flatMap(user -> {
+                    Map<String, Object> claims = new HashMap<>();
+                    claims.put("email", user.getEmail());
+                    claims.put("role", user.getRole());
+
+                    String token = jwtUtil.generateToken(user.getUsername(), claims);
+
+                    AuthResponse response = AuthResponse.builder()
+                            .token(token)
+                            .username(user.getUsername())
+                            .email(user.getEmail())
+                            .role(user.getRole())
+                            .message("Login successful")
+                            .build();
+
+                    log.info("Login successful for user: {}", user.getUsername());
+                    return Mono.just(response);
+                })
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.warn("Login failed for username: {}", request.getUsername());
+                    return Mono.just(AuthResponse.builder()
+                            .message("Invalid username or password")
+                            .build());
+                }));
+    }
+
+    @Override
+    public Mono<AuthResponse> register(RegisterRequest request) {
+        log.info("Registration attempt for username: {}", request.getUsername());
+
+        return userRepository.existsByUsername(request.getUsername())
+                .flatMap(exists -> {
+                    if (Boolean.TRUE.equals(exists)) {
+                        log.warn("Registration failed - username already exists: {}", request.getUsername());
+                        return Mono.just(AuthResponse.builder()
+                                .message("Username already exists")
+                                .build());
+                    }
+
+                    return userRepository.existsByEmail(request.getEmail())
+                            .flatMap(emailExists -> {
+                                if (Boolean.TRUE.equals(emailExists)) {
+                                    log.warn("Registration failed - email already exists: {}", request.getEmail());
+                                    return Mono.just(AuthResponse.builder()
+                                            .message("Email already exists")
+                                            .build());
+                                }
+
+                                User user = User.builder()
+                                        .username(request.getUsername())
+                                        .password(passwordEncoder.encode(request.getPassword()))
+                                        .email(request.getEmail())
+                                        .firstName(request.getFirstName())
+                                        .lastName(request.getLastName())
+                                        .role("USER")
+                                        .enabled(true)
+                                        .createdAt(LocalDateTime.now())
+                                        .updatedAt(LocalDateTime.now())
+                                        .lastPasswordChanged(LocalDateTime.now())
+                                        .passwordExpiryDays(90)
+                                        .forcePasswordChange(false)
+                                        .build();
+
+                                return userRepository.save(user)
+                                        .flatMap(savedUser -> {
+                                            Map<String, Object> claims = new HashMap<>();
+                                            claims.put("email", savedUser.getEmail());
+                                            claims.put("role", savedUser.getRole());
+
+                                            String token = jwtUtil.generateToken(savedUser.getUsername(), claims);
+
+                                            AuthResponse response = AuthResponse.builder()
+                                                    .token(token)
+                                                    .username(savedUser.getUsername())
+                                                    .email(savedUser.getEmail())
+                                                    .role(savedUser.getRole())
+                                                    .message("Registration successful")
+                                                    .build();
+
+                                            log.info("Registration successful for user: {}", savedUser.getUsername());
+                                            return Mono.just(response);
+                                        });
+                            });
+                });
+    }
+
+    @Override
+    public Mono<ValidateTokenResponse> validateToken(String token) {
+        try {
+            if (Boolean.TRUE.equals(jwtUtil.validateToken(token))) {
+                String username = jwtUtil.extractUsername(token);
+                String role = jwtUtil.extractRole(token);
+
+                return userRepository.findByUsername(username)
+                        .filter(User::getEnabled)
+                        .map(user -> ValidateTokenResponse.builder()
+                                .valid(true)
+                                .username(user.getUsername())
+                                .role(role != null ? role : user.getRole())
+                                .message("Token is valid")
+                                .build())
+                        .switchIfEmpty(Mono.just(ValidateTokenResponse.builder()
+                                .valid(false)
+                                .message("User not found or disabled")
+                                .build()));
+            }
+
+            return Mono.just(ValidateTokenResponse.builder()
+                    .valid(false)
+                    .message("Invalid or expired token")
+                    .build());
+
+        } catch (Exception e) {
+            log.error("Token validation error: {}", e.getMessage());
+            return Mono.just(ValidateTokenResponse.builder()
+                    .valid(false)
+                    .message("Token validation failed")
+                    .build());
+        }
+    }
+
+    @Override
+    public Mono<ChangePasswordResponse> changePassword(ChangePasswordRequest request) {
+        log.info("Password change attempt for username: {}", request.getUsername());
+
+        // Validate that new password and confirm password match
+        if (!PasswordValidator.passwordsMatch(request.getNewPassword(), request.getConfirmPassword())) {
+            log.warn("Password change failed - passwords do not match for user: {}", request.getUsername());
+            return Mono.just(ChangePasswordResponse.builder()
+                    .success(false)
+                    .message("New password and confirm password do not match")
+                    .build());
+        }
+
+        // Validate password strength
+        PasswordValidator.ValidationResult validationResult = PasswordValidator.validate(request.getNewPassword());
+        if (!validationResult.isValid()) {
+            log.warn("Password change failed - weak password for user: {}", request.getUsername());
+            return Mono.just(ChangePasswordResponse.builder()
+                    .success(false)
+                    .message(validationResult.getErrorMessage())
+                    .build());
+        }
+
+        return userRepository.findByUsername(request.getUsername())
+                .flatMap(user -> {
+                    // Verify current password
+                    if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+                        log.warn("Password change failed - incorrect current password for user: {}", request.getUsername());
+                        return Mono.just(ChangePasswordResponse.builder()
+                                .success(false)
+                                .message("Current password is incorrect")
+                                .build());
+                    }
+
+                    // Check if new password matches current password
+                    if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+                        log.warn("Password change failed - new password same as current for user: {}", request.getUsername());
+                        return Mono.just(ChangePasswordResponse.builder()
+                                .success(false)
+                                .message("New password must be different from current password")
+                                .build());
+                    }
+
+                    // Check password history to prevent reuse
+                    return passwordHistoryRepository.findByUserIdOrderByChangedAtDesc(user.getId())
+                            .take(PASSWORD_HISTORY_LIMIT)
+                            .collectList()
+                            .defaultIfEmpty(java.util.Collections.emptyList())
+                            .flatMap(passwordHistories -> {
+                                // Check if new password matches any previous passwords
+                                boolean passwordReused = passwordHistories.stream()
+                                        .anyMatch(ph -> passwordEncoder.matches(request.getNewPassword(), ph.getPasswordHash()));
+
+                                if (passwordReused) {
+                                    log.warn("Password change failed - password reused for user: {}", request.getUsername());
+                                    return Mono.just(ChangePasswordResponse.builder()
+                                            .success(false)
+                                            .message(String.format("Password cannot be the same as your last %d passwords", PASSWORD_HISTORY_LIMIT))
+                                            .build());
+                                }
+
+                                // Add current password to history before changing
+                                PasswordHistory passwordHistory = PasswordHistory.builder()
+                                        .userId(user.getId())
+                                        .passwordHash(user.getPassword())
+                                        .changedAt(LocalDateTime.now())
+                                        .build();
+
+                                // Save password history and update user in sequence
+                                return passwordHistoryRepository.save(passwordHistory)
+                                        .flatMap(savedHistory -> {
+                                            log.debug("Password history saved for user: {}", user.getUsername());
+
+                                            // Update user password
+                                            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                                            user.setLastPasswordChanged(LocalDateTime.now());
+                                            user.setUpdatedAt(LocalDateTime.now());
+                                            user.setForcePasswordChange(false);
+
+                                            return userRepository.save(user);
+                                        })
+                                        .map(savedUser -> {
+                                            log.info("Password changed successfully for user: {}", savedUser.getUsername());
+                                            return ChangePasswordResponse.builder()
+                                                    .success(true)
+                                                    .message("Password changed successfully")
+                                                    .build();
+                                        })
+                                        .onErrorResume(error -> {
+                                            log.error("Error updating password for user: {}", user.getUsername(), error);
+                                            return Mono.just(ChangePasswordResponse.builder()
+                                                    .success(false)
+                                                    .message("Failed to update password. Please try again.")
+                                                    .build());
+                                        });
+                            });
+                })
+                .switchIfEmpty(Mono.defer(() -> {
+                    log.warn("Password change failed - user not found: {}", request.getUsername());
+                    return Mono.just(ChangePasswordResponse.builder()
+                            .success(false)
+                            .message("User not found")
+                            .build());
+                }));
+    }
+
+    @Override
+    public Mono<PasswordExpiryStatusResponse> checkPasswordExpiry(String username) {
+        log.info("Checking password expiry for username: {}", username);
+
+        return userRepository.findByUsername(username)
+                .map(user -> {
+                    LocalDateTime lastChanged = user.getLastPasswordChanged();
+                    if (lastChanged == null) {
+                        lastChanged = user.getCreatedAt();
+                    }
+
+                    Integer expiryDays = user.getPasswordExpiryDays();
+                    if (expiryDays == null) {
+                        expiryDays = 90; // Default to 90 days
+                    }
+
+                    long daysSinceLastChange = ChronoUnit.DAYS.between(lastChanged, LocalDateTime.now());
+                    long daysUntilExpiry = expiryDays - daysSinceLastChange;
+
+                    boolean passwordExpired = daysUntilExpiry <= 0;
+                    boolean forceChange = Boolean.TRUE.equals(user.getForcePasswordChange());
+
+                    String message;
+                    if (forceChange) {
+                        message = "You must change your password to continue";
+                    } else if (passwordExpired) {
+                        message = String.format("Your password expired %d days ago. Please change it immediately.", Math.abs(daysUntilExpiry));
+                    } else if (daysUntilExpiry <= 7) {
+                        message = String.format("Your password will expire in %d days. Please change it soon.", daysUntilExpiry);
+                    } else {
+                        message = String.format("Your password is valid for %d more days", daysUntilExpiry);
+                    }
+
+                    return PasswordExpiryStatusResponse.builder()
+                            .passwordExpired(passwordExpired || forceChange)
+                            .forcePasswordChange(forceChange)
+                            .lastPasswordChanged(lastChanged)
+                            .passwordExpiryDays(expiryDays)
+                            .daysUntilExpiry((int) daysUntilExpiry)
+                            .message(message)
+                            .build();
+                })
+                .switchIfEmpty(Mono.just(PasswordExpiryStatusResponse.builder()
+                        .passwordExpired(false)
+                        .forcePasswordChange(false)
+                        .message("User not found")
+                        .build()));
+    }
+}

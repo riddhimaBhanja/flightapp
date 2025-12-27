@@ -1,0 +1,34 @@
+# ============================================
+# FLIGHT SERVICE - DOCKER DEPLOYMENT PROFILE
+# ============================================
+
+server:
+  port: 8081
+
+spring:
+  r2dbc:
+    url: r2dbc:mysql://${DB_HOST:mysql}:${DB_PORT:3306}/${DB_NAME:flight_db}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:root}
+  sql:
+    init:
+      mode: always
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://eureka-server:8761/eureka/}
+  instance:
+    hostname: flight-service
+    prefer-ip-address: false
+
+jwt:
+  secret: ${JWT_SECRET:DOCKER_SECRET_KEY_FOR_JWT_TOKEN_MUST_BE_OVERRIDDEN_IN_ENV}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+logging:
+  level:
+    com.flightapp.flight: INFO
+    org.springframework.r2dbc: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

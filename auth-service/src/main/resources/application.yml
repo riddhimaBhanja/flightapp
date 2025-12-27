@@ -1,0 +1,44 @@
+# ============================================
+# AUTH SERVICE - COMMON CONFIGURATION
+# ============================================
+# This file contains profile-independent configuration
+# Profile-specific values are in:
+#   - application-local.yml (local development)
+#   - application-docker.yml (docker deployment)
+# ============================================
+
+spring:
+  application:
+    name: auth-service
+  
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+  
+  data:
+    r2dbc:
+      repositories:
+        enabled: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+# Circuit Breaker timeout settings (common across environments)
+resilience4j:
+  timelimiter:
+    instances:
+      authService:
+        timeout-duration: 3s

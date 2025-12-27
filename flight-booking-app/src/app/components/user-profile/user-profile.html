@@ -1,0 +1,198 @@
+<div class="profile-container">
+  <header class="profile-header">
+    <div class="header-content">
+      <h1>My Profile</h1>
+      <div class="header-actions">
+        <button class="btn-secondary" (click)="navigateToDashboard()">Back to Dashboard</button>
+        <button class="btn-logout" (click)="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="profile-content">
+    <!-- Password Expiry Warning -->
+    <div class="alert alert-warning" *ngIf="showPasswordExpiryWarning && passwordExpiryStatus">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-content">
+        <strong>Password Expiry Notice</strong>
+        <p>{{ passwordExpiryStatus.message }}</p>
+      </div>
+    </div>
+
+    <!-- Profile Information Section -->
+    <div class="profile-section">
+      <div class="section-header">
+        <h2>Account Information</h2>
+      </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Username</label>
+          <div class="info-value">{{ user.username }}</div>
+        </div>
+        <div class="info-item">
+          <label>Email</label>
+          <div class="info-value">{{ user.email }}</div>
+        </div>
+        <div class="info-item">
+          <label>Role</label>
+          <div class="info-value">
+            <span class="role-badge" [class.admin]="user.role === 'ADMIN'">
+              {{ user.role }}
+            </span>
+          </div>
+        </div>
+        <div class="info-item" *ngIf="passwordExpiryStatus && !passwordExpiryStatus.passwordExpired">
+          <label>Password Expires In</label>
+          <div class="info-value">{{ passwordExpiryStatus.daysUntilExpiry }} days</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password Section -->
+    <div class="profile-section">
+      <div class="section-header">
+        <h2>Change Password</h2>
+        <p class="section-description">Update your password to keep your account secure</p>
+      </div>
+
+      <!-- Success Message -->
+      <div class="alert alert-success" *ngIf="showChangePasswordSuccess">
+        <div class="alert-icon">✓</div>
+        <div class="alert-content">
+          <strong>Success!</strong>
+          <p>{{ changePasswordMessage }}</p>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div class="alert alert-error" *ngIf="changePasswordError">
+        <div class="alert-icon">✕</div>
+        <div class="alert-content">
+          <strong>Error</strong>
+          <p>{{ changePasswordError }}</p>
+        </div>
+      </div>
+
+      <form class="password-form" (ngSubmit)="onChangePassword()">
+        <!-- Current Password -->
+        <div class="form-group">
+          <label for="currentPassword">Current Password <span class="required">*</span></label>
+          <input
+            type="password"
+            id="currentPassword"
+            name="currentPassword"
+            [(ngModel)]="currentPassword"
+            placeholder="Enter your current password"
+            required
+            autocomplete="current-password"
+          />
+        </div>
+
+        <!-- New Password -->
+        <div class="form-group">
+          <label for="newPassword">New Password <span class="required">*</span></label>
+          <input
+            type="password"
+            id="newPassword"
+            name="newPassword"
+            [(ngModel)]="newPassword"
+            (input)="onPasswordInput()"
+            placeholder="Enter your new password"
+            required
+            autocomplete="new-password"
+          />
+
+          <!-- Password Strength Indicator -->
+          <div class="password-strength" *ngIf="newPassword.length > 0">
+            <div class="strength-label">
+              Password Strength:
+              <span [style.color]="passwordStrength.color">{{ passwordStrength.label }}</span>
+            </div>
+            <div class="strength-bar">
+              <div
+                class="strength-fill"
+                [style.width.%]="passwordStrength.score"
+                [style.background-color]="passwordStrength.color"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Password Requirements -->
+          <div class="password-requirements" *ngIf="newPassword.length > 0 || passwordErrors.length > 0">
+            <div class="requirement-title">Password must contain:</div>
+            <ul class="requirement-list">
+              <li [class.valid]="newPassword.length >= 8" [class.invalid]="newPassword.length > 0 && newPassword.length < 8">
+                <span class="check-icon">{{ newPassword.length >= 8 ? '✓' : '✕' }}</span>
+                At least 8 characters
+              </li>
+              <li [class.valid]="newPassword.match('[A-Z]')" [class.invalid]="newPassword.length > 0 && !newPassword.match('[A-Z]')">
+                <span class="check-icon">{{ newPassword.match('[A-Z]') ? '✓' : '✕' }}</span>
+                One uppercase letter
+              </li>
+              <li [class.valid]="newPassword.match('[a-z]')" [class.invalid]="newPassword.length > 0 && !newPassword.match('[a-z]')">
+                <span class="check-icon">{{ newPassword.match('[a-z]') ? '✓' : '✕' }}</span>
+                One lowercase letter
+              </li>
+              <li [class.valid]="newPassword.match('[0-9]')" [class.invalid]="newPassword.length > 0 && !newPassword.match('[0-9]')">
+                <span class="check-icon">{{ newPassword.match('[0-9]') ? '✓' : '✕' }}</span>
+                One number
+              </li>
+              <li [class.valid]="newPassword.match('[@$!%*?&]')" [class.invalid]="newPassword.length > 0 && !newPassword.match('[@$!%*?&]')">
+                <span class="check-icon">{{ newPassword.match('[@$!%*?&]') ? '✓' : '✕' }}</span>
+                One special character (@$!%*?&)
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label for="confirmPassword">Confirm New Password <span class="required">*</span></label>
+          <input
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
+            (input)="checkPasswordsMatch()"
+            placeholder="Re-enter your new password"
+            required
+            autocomplete="new-password"
+          />
+          <div class="error-message" *ngIf="!passwordsMatch && confirmPassword.length > 0">
+            Passwords do not match
+          </div>
+        </div>
+
+        <!-- Security Tips -->
+        <div class="security-tips">
+          <div class="tips-header">🔒 Security Tips</div>
+          <ul>
+            <li>Use a unique password that you don't use for other accounts</li>
+            <li>Avoid using personal information like birthdays or names</li>
+            <li>Consider using a password manager to generate and store strong passwords</li>
+            <li>Your password cannot be the same as your last 5 passwords</li>
+          </ul>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="!isFormValid() || isChangingPassword"
+          >
+            {{ isChangingPassword ? 'Changing Password...' : 'Change Password' }}
+          </button>
+          <button
+            type="button"
+            class="btn-secondary"
+            (click)="resetPasswordForm()"
+            [disabled]="isChangingPassword"
+          >
+            Reset Form
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

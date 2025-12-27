@@ -1,0 +1,7 @@
+FROM maven:3.8.5-openjdk-17
+
+WORKDIR /flight-service
+
+COPY flight-service/target/flight-service-1.0.0.jar app.jar
+
+CMD ["java","-jar","app.jar"]

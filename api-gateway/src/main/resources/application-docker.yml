@@ -1,0 +1,48 @@
+# ============================================
+# API GATEWAY - DOCKER DEPLOYMENT PROFILE
+# ============================================
+
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://auth-service:8084
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=0
+        - id: flight-service
+          uri: http://flight-service:8081
+          predicates:
+            - Path=/api/flights/**
+          filters:
+            - StripPrefix=0
+        - id: booking-service
+          uri: http://booking-service:8082
+          predicates:
+            - Path=/api/bookings/**
+          filters:
+            - StripPrefix=0
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER:http://eureka-server:8761/eureka/}
+  instance:
+    hostname: api-gateway
+    prefer-ip-address: false
+
+jwt:
+  secret: ${JWT_SECRET:DOCKER_SECRET_KEY_FOR_JWT_TOKEN_MUST_BE_OVERRIDDEN_IN_ENV}
+  expiration: ${JWT_EXPIRATION:86400000}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    reactor.netty: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

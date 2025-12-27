@@ -1,0 +1,685 @@
+// IMPRESSIVE Flight Booking Login Page - Beautiful & Visible Background
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2rem;
+
+  // STUNNING visible airplane background - lighter overlay for better image visibility
+  background:
+    linear-gradient(135deg, rgba(13, 71, 161, 0.70) 0%, rgba(26, 35, 126, 0.60) 50%, rgba(21, 101, 192, 0.65) 100%),
+    url('https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?w=1920&q=80') center/cover no-repeat fixed;
+
+  // ALTERNATIVE BEAUTIFUL TRAVEL BACKGROUNDS - Choose your favorite:
+  // url('https://images.unsplash.com/photo-1569629743817-70d8db6c323b?w=1920&q=80') - Modern airport terminal 🏢
+  // url('https://images.unsplash.com/photo-1488085061387-422e29b40080?w=1920&q=80') - Passport & boarding passes 🎫
+  // url('https://images.unsplash.com/photo-1556388158-158ea5ccacbd?w=1920&q=80') - Airplane at golden sunset 🌅
+  // url('https://images.unsplash.com/photo-1542296332-2e4473faf563?w=1920&q=80') - Private jet interior ✈️
+  // url('https://images.unsplash.com/photo-1583837151670-2c41200c96e0?w=1920&q=80') - Luxury flight cabin 💺
+
+  // Sparkle overlay effect
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.10) 0%, transparent 50%),
+      radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 50% 20%, rgba(255, 200, 55, 0.06) 0%, transparent 50%);
+    animation: breathe 12s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  // Floating light effect
+  &::after {
+    content: '';
+    position: absolute;
+    top: -10%;
+    right: -10%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255, 200, 55, 0.12), transparent 70%);
+    border-radius: 50%;
+    animation: float 22s ease-in-out infinite;
+    pointer-events: none;
+  }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-35px, 35px) rotate(8deg); }
+}
+
+.back-to-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 251, 252, 0.95) 100%);
+  border-radius: 16px;
+  border: 3px solid transparent;
+  background-image:
+    linear-gradient(white, white),
+    linear-gradient(135deg, #1565C0 0%, #FFD700 50%, #1976D2 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  color: #1565C0;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: 'Poppins', sans-serif;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 6px 20px rgba(21, 101, 192, 0.2),
+    0 3px 10px rgba(255, 215, 0, 0.1);
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+    transition: left 0.6s ease;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    background: linear-gradient(135deg, #FFD700, #1565C0);
+    border-radius: 16px;
+    z-index: -1;
+    opacity: 0;
+    filter: blur(10px);
+    transition: opacity 0.4s ease;
+  }
+
+  svg {
+    width: 22px;
+    height: 22px;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    filter: drop-shadow(0 2px 4px rgba(21, 101, 192, 0.3));
+  }
+
+  &:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow:
+      0 12px 32px rgba(21, 101, 192, 0.35),
+      0 6px 16px rgba(255, 215, 0, 0.25);
+
+    &::before {
+      left: 100%;
+    }
+
+    &::after {
+      opacity: 0.6;
+    }
+
+    svg {
+      transform: translateX(-6px) rotate(-15deg) scale(1.2);
+    }
+  }
+
+  &:active {
+    transform: translateY(-2px) scale(1.02);
+  }
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(45px) saturate(200%);
+  -webkit-backdrop-filter: blur(45px) saturate(200%);
+  border-radius: 32px;
+  box-shadow:
+    0 35px 100px rgba(0, 0, 0, 0.40),
+    0 15px 50px rgba(0, 0, 0, 0.25),
+    inset 0 2px 4px rgba(255, 255, 255, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.3);
+  width: 100%;
+  max-width: 520px;
+  padding: 3.75rem 3.25rem;
+  animation: slideUpScale 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  z-index: 1;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+
+  // Premium top gradient bar
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #1565C0 0%, #1976D2 50%, #FFD700 100%);
+    border-radius: 32px 32px 0 0;
+    box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3);
+  }
+
+  // Subtle inner glow
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 80% 20%, rgba(25, 118, 210, 0.05), transparent 50%),
+      radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.05), transparent 50%);
+    border-radius: 32px;
+    pointer-events: none;
+  }
+}
+
+@keyframes slideUpScale {
+  from {
+    opacity: 0;
+    transform: translateY(60px) scale(0.90);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2.75rem;
+  position: relative;
+  z-index: 1;
+
+  .logo {
+    width: 105px;
+    height: 105px;
+    margin: 0 auto 1.75rem;
+    background: linear-gradient(135deg, #1565C0 0%, #1976D2 50%, #42A5F5 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 18px 50px rgba(21, 101, 192, 0.40),
+      0 8px 20px rgba(0, 0, 0, 0.25),
+      inset 0 3px 6px rgba(255, 255, 255, 0.25),
+      0 0 0 4px rgba(255, 255, 255, 0.1);
+    position: relative;
+    animation: float 5s ease-in-out infinite;
+
+    // Rotating gradient glow
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -10px;
+      background: conic-gradient(from 0deg, #1565C0, #FFD700, #1E88E5, #FFA500, #1565C0);
+      border-radius: 50%;
+      opacity: 0.20;
+      filter: blur(15px);
+      animation: rotate 8s linear infinite;
+    }
+
+    // Pulsing outer ring
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+
+    svg {
+      width: 56px;
+      height: 56px;
+      color: white;
+      filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.30));
+      position: relative;
+      z-index: 1;
+      animation: planeTilt 3.5s ease-in-out infinite;
+    }
+  }
+
+  h1 {
+    font-size: 2.25rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #0D47A1 0%, #1565C0 50%, #1976D2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 0.75rem 0;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: -0.03em;
+    filter: drop-shadow(0 2px 4px rgba(13, 71, 161, 0.1));
+  }
+
+  p {
+    color: var(--gray-600);
+    font-size: 1.0625rem;
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
+@keyframes rotate {
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.5;
+  }
+}
+
+@keyframes planeTilt {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+
+.login-form {
+  position: relative;
+  z-index: 1;
+
+  .form-group {
+    margin-bottom: 1.875rem;
+
+    label {
+      display: block;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gray-800);
+      margin-bottom: 0.8125rem;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .input-wrapper {
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 18px;
+        padding: 2px;
+        background: linear-gradient(135deg, #1565C0, #FFD700, #1976D2);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        pointer-events: none;
+      }
+
+      svg {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 24px;
+        height: 24px;
+        color: #90a4ae;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+      }
+
+      input {
+        width: 100%;
+        padding: 1.25rem 1.25rem 1.25rem 3.75rem;
+        border: 3px solid transparent;
+        border-radius: 18px;
+        font-size: 1.0625rem;
+        color: #263238;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 251, 252, 0.9) 100%);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 500;
+        box-shadow:
+          0 4px 12px rgba(0, 0, 0, 0.08),
+          inset 0 1px 2px rgba(255, 255, 255, 0.5);
+        position: relative;
+
+        &:hover {
+          background: white;
+          box-shadow:
+            0 6px 18px rgba(21, 101, 192, 0.12),
+            inset 0 1px 2px rgba(255, 255, 255, 0.5);
+          transform: translateY(-2px);
+
+          ~ svg {
+            color: #1565C0;
+            transform: translateY(-50%) scale(1.05);
+          }
+        }
+
+        &:focus {
+          outline: none;
+          background: white;
+          border: 3px solid transparent;
+          background-image:
+            linear-gradient(white, white),
+            linear-gradient(135deg, #1565C0 0%, #FFD700 50%, #1976D2 100%);
+          background-origin: border-box;
+          background-clip: padding-box, border-box;
+          box-shadow:
+            0 8px 32px rgba(21, 101, 192, 0.25),
+            0 4px 16px rgba(255, 215, 0, 0.15),
+            inset 0 1px 2px rgba(255, 255, 255, 0.8);
+          transform: translateY(-3px) scale(1.01);
+
+          ~ svg {
+            color: #1565C0;
+            transform: translateY(-50%) scale(1.15) rotate(5deg);
+            filter: drop-shadow(0 3px 8px rgba(21, 101, 192, 0.4));
+          }
+        }
+
+        &.invalid {
+          border-color: #ef5350;
+          background: #ffebee;
+
+          ~ svg {
+            color: #ef5350;
+          }
+        }
+
+        &::placeholder {
+          color: #90a4ae;
+          font-weight: 400;
+        }
+      }
+
+      &:focus-within::before {
+        opacity: 1;
+      }
+    }
+
+    .error-message {
+      margin-top: 0.6875rem;
+      font-size: 0.9375rem;
+      color: var(--error-600);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      animation: shake 0.45s ease;
+
+      &::before {
+        content: '⚠';
+        font-size: 1.0625rem;
+      }
+    }
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-10px); }
+  40%, 80% { transform: translateX(10px); }
+}
+
+.alert {
+  padding: 1.1875rem 1.625rem;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1.75rem;
+  animation: slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  &.alert-danger {
+    background: linear-gradient(135deg, var(--accent-50), var(--accent-100));
+    color: var(--accent-900);
+    border: 2px solid var(--accent-300);
+    box-shadow: 0 5px 15px rgba(244, 63, 94, 0.18);
+
+    &::before {
+      content: '✕';
+      width: 36px;
+      height: 36px;
+      background: var(--error-500);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      box-shadow: 0 5px 12px rgba(239, 68, 68, 0.35);
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 1.375rem 1.75rem;
+  background: linear-gradient(135deg, #1565C0 0%, #1976D2 40%, #2196F3 100%);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 1.125rem;
+  font-weight: 800;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow:
+    0 15px 40px rgba(21, 101, 192, 0.40),
+    0 5px 18px rgba(0, 0, 0, 0.18);
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+
+  // Shimmer sweep effect
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+    transition: left 0.8s ease;
+  }
+
+  // Bottom glow
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow:
+      0 25px 60px rgba(21, 101, 192, 0.50),
+      0 10px 30px rgba(0, 0, 0, 0.25);
+
+    &::before {
+      left: 100%;
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(-2px) scale(1);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+
+    .spinner-icon {
+      width: 26px;
+      height: 26px;
+      animation: spin 1s linear infinite;
+
+      .path {
+        stroke: white;
+        stroke-linecap: round;
+        animation: dash 1.5s ease-in-out infinite;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+.form-footer {
+  text-align: center;
+  margin-top: 2.5rem;
+  padding-top: 2.5rem;
+  border-top: 2px solid var(--gray-200);
+
+  p {
+    color: var(--gray-700);
+    font-size: 1.0625rem;
+    margin: 0;
+    font-weight: 600;
+
+    a {
+      color: #1565C0;
+      text-decoration: none;
+      font-weight: 800;
+      transition: all var(--transition-smooth);
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #1565C0, #FFD700);
+        border-radius: 3px;
+        transition: width var(--transition-smooth);
+        box-shadow: 0 2px 8px rgba(21, 101, 192, 0.3);
+      }
+
+      &:hover {
+        color: #0D47A1;
+
+        &::after {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 640px) {
+  .login-container {
+    padding: 1.5rem;
+  }
+
+  .login-card {
+    padding: 3rem 2.25rem;
+  }
+
+  .login-header {
+    margin-bottom: 2.25rem;
+
+    .logo {
+      width: 90px;
+      height: 90px;
+
+      svg {
+        width: 48px;
+        height: 48px;
+      }
+    }
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    p {
+      font-size: 1rem;
+    }
+  }
+
+  .btn-submit {
+    padding: 1.25rem 1.5rem;
+    font-size: 1.0625rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    background-attachment: scroll;
+  }
+
+  .login-card {
+    padding: 2.75rem 2rem;
+  }
+
+  .login-header h1 {
+    font-size: 1.875rem;
+  }
+}

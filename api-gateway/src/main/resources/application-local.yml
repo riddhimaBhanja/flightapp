@@ -1,0 +1,35 @@
+# ============================================
+# API GATEWAY - LOCAL DEVELOPMENT PROFILE
+# ============================================
+
+server:
+  port: 8080
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=0
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+
+jwt:
+  secret: LOCAL_DEV_SECRET_KEY_FOR_JWT_TOKEN_GENERATION_AND_VALIDATION_MUST_BE_LONG_ENOUGH
+  expiration: 86400000
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: DEBUG
+  file:
+    name: logs/api-gateway-local.log

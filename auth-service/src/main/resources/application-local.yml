@@ -1,0 +1,38 @@
+# ============================================
+# AUTH SERVICE - LOCAL DEVELOPMENT PROFILE
+# ============================================
+# Activate with: -Dspring.profiles.active=local
+# Or: SPRING_PROFILES_ACTIVE=local
+
+server:
+  port: 8084
+
+spring:
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/flightapp_auth
+    username: root
+    password: Richseebo@1
+  
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+
+jwt:
+  secret: LOCAL_DEV_SECRET_KEY_FOR_JWT_TOKEN_GENERATION_AND_VALIDATION_MUST_BE_LONG_ENOUGH
+  expiration: 86400000  # 24 hours in milliseconds
+
+password:
+  expiry:
+    demo-mode: true
+    demo-seconds: 300  # 5 minutes for local testing
+    production-days: 90
+
+logging:
+  level:
+    com.flightapp.auth: DEBUG
+    org.springframework.r2dbc: DEBUG
+  file:
+    name: logs/auth-service-local.log

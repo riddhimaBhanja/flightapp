@@ -1,0 +1,33 @@
+# ============================================
+# FLIGHT SERVICE - LOCAL DEVELOPMENT PROFILE
+# ============================================
+
+server:
+  port: 8081
+
+spring:
+  r2dbc:
+    url: r2dbc:mysql://localhost:3307/flight_db
+    username: root
+    password: root
+  sql:
+    init:
+      mode: always
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
+
+jwt:
+  secret: LOCAL_DEV_SECRET_KEY_FOR_JWT_TOKEN_GENERATION_AND_VALIDATION_MUST_BE_LONG_ENOUGH
+  expiration: 86400000
+
+logging:
+  level:
+    com.flightapp.flight: DEBUG
+    org.springframework.r2dbc: DEBUG
+  file:
+    name: logs/flight-service-local.log

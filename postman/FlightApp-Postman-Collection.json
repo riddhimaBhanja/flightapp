@@ -1,0 +1,311 @@
+{
+  "info": {
+    "name": "FlightApp Microservices",
+    "description": "Complete API collection for Flight Booking Microservices",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pnr",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set(\"jwt_token\", jsonData.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"password123\",\n  \"email\": \"newuser@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Token (POST)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{jwt_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/validate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "validate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Validate Token (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/validate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "validate"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Flight Service",
+      "item": [
+        {
+          "name": "Search Flights",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"origin\": \"DEL\",\n  \"destination\": \"BOM\",\n  \"travelDate\": \"2025-12-15\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/flights/search",
+              "host": ["{{base_url}}"],
+              "path": ["api", "flights", "search"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Flight Inventory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"flightNumber\": \"AI999\",\n  \"airline\": \"Air India\",\n  \"origin\": \"DEL\",\n  \"destination\": \"BLR\",\n  \"departureTime\": \"2025-12-20T08:00:00\",\n  \"arrivalTime\": \"2025-12-20T11:00:00\",\n  \"availableSeats\": 200,\n  \"price\": 6500.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/flights/add",
+              "host": ["{{base_url}}"],
+              "path": ["api", "flights", "add"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Flight By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/flights/inventory/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "flights", "inventory", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reduce Seats",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/flights/inventory/1/reduce-seats?seats=2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "flights", "inventory", "1", "reduce-seats"],
+              "query": [
+                {
+                  "key": "seats",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Restore Seats",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/flights/inventory/1/restore-seats?seats=2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "flights", "inventory", "1", "restore-seats"],
+              "query": [
+                {
+                  "key": "seats",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Booking Service",
+      "item": [
+        {
+          "name": "Create Booking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set(\"pnr\", jsonData.pnr);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"flightId\": 1,\n  \"passengerName\": \"John Doe\",\n  \"passengerEmail\": \"john@example.com\",\n  \"passengerPhone\": \"9876543210\",\n  \"numberOfSeats\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/book",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "book"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Booking By PNR",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/pnr/{{pnr}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "pnr", "{{pnr}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Booking",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/cancel/{{pnr}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "cancel", "{{pnr}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
